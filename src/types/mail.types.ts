@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export const templateTypeEnum = z.enum([
+    "simple",
+    "welcome",
+    "reset-password",
+    "forgot-password",
+    "otp",
+]);
+
+export type TemplateType = z.infer<typeof templateTypeEnum>;
+
 const attachmentSchema = z.object({
     filename: z.string(),
     content: z.string(), // base64
@@ -7,15 +17,18 @@ const attachmentSchema = z.object({
 });
 
 export const sendMailSchema = z.object({
+    from: z.string().email().optional(),
     to: z.union([z.string().email(), z.array(z.string().email())]),
     subject: z.string().min(1),
-    html: z.string().optional(),
-    text: z.string().optional(),
     cc: z.union([z.string().email(), z.array(z.string().email())]).optional(),
     bcc: z.union([z.string().email(), z.array(z.string().email())]).optional(),
-    attachments: z.array(attachmentSchema).optional(),
-}).refine((data) => data.html || data.text, {
-    message: "html ou text est requis",
+    attachment: z
+        .union([attachmentSchema, z.array(attachmentSchema)])
+        .optional(),
+    text: z.string().optional(),
+    link: z.string().url().optional(),
+    value: z.string().optional(),
+    templateType: templateTypeEnum.default("simple"),
 });
 
 export type SendMailInput = z.infer<typeof sendMailSchema>;

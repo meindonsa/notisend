@@ -16,15 +16,21 @@ export async function verifyMailer() {
     await transporter.verify();
 }
 
-export async function sendMail(input: SendMailInput) {
-    const attachments = input.attachments?.map((a) => ({
+export async function sendMail(input: SendMailInput & { html: string }) {
+    const rawAttachments = input.attachment
+        ? Array.isArray(input.attachment)
+            ? input.attachment
+            : [input.attachment]
+        : undefined;
+
+    const attachments = rawAttachments?.map((a) => ({
         filename: a.filename,
         content: Buffer.from(a.content, "base64"),
         contentType: a.contentType,
     }));
 
     return transporter.sendMail({
-        from: env.MAIL_FROM,
+        from: input.from ?? env.MAIL_FROM,
         to: input.to,
         cc: input.cc,
         bcc: input.bcc,
