@@ -13,6 +13,7 @@ dist/
 # .env
 .env
 .env.production
+http-client.private*
 
 # logs
 logs/
