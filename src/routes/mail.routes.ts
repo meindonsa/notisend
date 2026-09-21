@@ -1,12 +1,14 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { sendMailSchema } from "../types/mail.types.js";
 import { sendMail } from "../services/mailer.js";
 import { renderTemplate } from "../services/template.js";
 import { apiKeyAuth } from "../middlewares/auth.js";
+import { rateLimit, securityHeaders, maxBodySize } from "../middlewares/security.js";
 
 export const mailRoutes = new Hono();
 
-mailRoutes.use("*", apiKeyAuth);
+mailRoutes.use("*", cors(), rateLimit, maxBodySize, securityHeaders, apiKeyAuth);
 
 mailRoutes.post("/", async (c) => {
     const body = await c.req.json();
