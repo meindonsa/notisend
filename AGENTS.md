@@ -27,6 +27,7 @@ The application is an ESM project (`"type": "module"`) and uses strict TypeScrip
 - Validate external input with the existing Zod-based configuration and validation patterns.
 - Use the existing error handling and audit helpers instead of exposing raw errors or secrets.
 - Keep secrets and environment-specific values in environment variables; update `.env.example` when adding a required variable.
+- All branches must start by `borisaxel/`
 
 ## Workflow
 - Use Conventional Commits (`feat`, `fix`, `docs`, `chore`, etc.).
@@ -36,6 +37,8 @@ The application is an ESM project (`"type": "module"`) and uses strict TypeScrip
 - Do not edit generated output in `dist/`; regenerate it with the build command.
 
 ## Limits
+- Never push code in master
+- Alway create branche before push code
 - Never read, edit, or delete `.env`; `.env.example` may be read and updated.
 - Do not change public API routes, authentication behavior, SMTP configuration, or security middleware without checking all affected callers and documenting the impact.
 - Ask permission before installing a new dependency, changing the directory structure, or introducing a new notification provider.
