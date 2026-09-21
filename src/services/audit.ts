@@ -9,10 +9,6 @@ if (!existsSync(LOG_DIR)) {
 
 const logStream = createWriteStream(join(LOG_DIR, "audit.log"), { flags: "a" });
 
-function sanitizeLog(value: string): string {
-    return value.replace(/[\r\n]/g, "").substring(0, 100);
-}
-
 export const auditLog: MiddlewareHandler = async (c, next) => {
     const startTime = Date.now();
     const apiKey = c.req.header("x-api-key");

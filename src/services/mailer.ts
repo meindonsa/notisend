@@ -1,7 +1,6 @@
 import nodemailer from "nodemailer";
 import { env, ALLOWED_DOMAINS } from "../config/env.js";
 import type { SendMailInput } from "../types/mail.types.js";
-import { createHash } from "node:crypto";
 
 export const transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,

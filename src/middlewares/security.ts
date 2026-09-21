@@ -1,5 +1,4 @@
 import type { MiddlewareHandler } from "hono";
-import { Hono } from "hono";
 
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 60_000;
