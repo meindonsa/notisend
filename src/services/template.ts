@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { escape } from "he";
+import he from "he";
 import type { TemplateType } from "../types/mail.types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,7 +29,7 @@ export async function renderTemplate(
     };
 
     for (const [key, val] of Object.entries(safeVars)) {
-        html = html.replaceAll(`{{${key}}}`, escape(val));
+        html = html.replaceAll(`{{${key}}}`, he.escape(val));
     }
 
     return html;
