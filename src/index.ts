@@ -1,3 +1,6 @@
+import * as dns from "node:dns";
+dns.setDefaultResultOrder('ipv4first')
+
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
@@ -6,7 +9,6 @@ import { mailRoutes } from "./routes/mail.routes.js";
 import { verifyMailer } from "./services/mailer.js";
 import { securityHeaders } from "./middlewares/security.js";
 import { safeError } from "./services/audit.js";
-import * as dns from "node:dns";
 
 const app = new Hono();
 
@@ -15,7 +17,7 @@ app.use("*", securityHeaders);
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 app.route("/api/mail", mailRoutes);
-dns.setDefaultResultOrder('ipv4first');
+
 async function start() {
   try {
     await verifyMailer();
