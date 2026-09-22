@@ -19,7 +19,7 @@ mailRoutes.post("/", async (c) => {
     }
 
     const data = parsed.data;
-
+    console.log("Recieve sent : " + data.subject || "a")
     try {
         const html = await renderTemplate(data.templateType, {
             subject: data.subject,
@@ -29,7 +29,7 @@ mailRoutes.post("/", async (c) => {
         });
 
         const info = await sendMail({ ...data, html });
-
+        console.log("Message sent")
         return c.json({ success: true, messageId: info.messageId });
     } catch (err) {
         console.error("Erreur envoi mail:", safeError(err));
