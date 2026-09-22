@@ -3,8 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "build": "tsc && npm run copy-assets",
+    "start": "node dist/index.js",
+    "copy-assets": "cp -r src/templates dist/templates"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
