@@ -6,7 +6,7 @@ const envSchema = z.object({
     MAIL_API_KEY: z.string().min(1),
     SMTP_HOST: z.string().min(1),
     SMTP_PORT: z.coerce.number(),
-    SMTP_SECURE: z.coerce.boolean().default(true),
+    SMTP_SECURE: z.enum(["true", "false"]).default("false").transform((val) => val === "true"),
     SMTP_USER: z.string().min(1),
     SMTP_PASS: z.string().min(1),
     MAIL_FROM: z.string().min(1),

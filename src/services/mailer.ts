@@ -95,7 +95,7 @@ export async function sendMail(input: SendMailInput & { html: string }) {
     const sanitizedTo = typeof input.to === "string" ? sanitizeEmail(input.to) : input.to.map(sanitizeEmail);
 
     return transporter.sendMail({
-        from: sanitizedFrom ?? env.MAIL_FROM,
+        from: env.MAIL_FROM,
         to: sanitizedTo,
         cc: input.cc ? (typeof input.cc === "string" ? sanitizeEmail(input.cc) : input.cc.map(sanitizeEmail)) : undefined,
         bcc: input.bcc ? (typeof input.bcc === "string" ? sanitizeEmail(input.bcc) : input.bcc.map(sanitizeEmail)) : undefined,
