@@ -1,22 +1,15 @@
-import nodemailer from "nodemailer";
-import { env, ALLOWED_DOMAINS } from "../config/env.js";
+import { env, ALLOWED_DOMAINS, SENDER } from "../config/env.js";
 import type { SendMailInput } from "../types/mail.types.js";
 
-export const transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_SECURE,
-    auth: {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS,
-    },
-    tls: {
-        rejectUnauthorized: true,
-    },
-});
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
 export async function verifyMailer() {
-    await transporter.verify();
+    const res = await fetch("https://api.brevo.com/v3/account", {
+        headers: { "api-key": env.BREVO_API_KEY },
+    });
+    if (!res.ok) {
+        throw new Error(`Clé API Brevo invalide (${res.status})`);
+    }
 }
 
 const MAX_ATTACHMENT_SIZE = 5_000_000;
@@ -60,21 +53,20 @@ export function validateAttachments(attachments: SendMailInput["attachment"]) {
     }
 }
 
-export async function sendMail(input: SendMailInput & { html: string }) {
-    const recipients = [
-        input.to,
-        ...(input.cc ?? []),
-        ...(input.bcc ?? []),
-    ];
+function toEmailList(value: string | string[] | undefined): { email: string }[] | undefined {
+    if (!value) return undefined;
+    const arr = Array.isArray(value) ? value : [value];
+    return arr.map((e) => ({ email: sanitizeEmail(e) }));
+}
 
+export async function sendMail(input: SendMailInput & { html: string }) {
+    const recipients = [input.to, ...(input.cc ?? []), ...(input.bcc ?? [])];
     for (const r of recipients.flat()) {
         validateRecipient(r);
     }
-
     if (input.from) {
         validateRecipient(input.from);
     }
-
     if (input.attachment) {
         validateAttachments(input.attachment);
     }
@@ -85,23 +77,35 @@ export async function sendMail(input: SendMailInput & { html: string }) {
             : [input.attachment]
         : undefined;
 
-    const attachments = rawAttachments?.map((a) => ({
-        filename: a.filename,
-        content: Buffer.from(a.content, "base64"),
-        contentType: a.contentType,
+    const attachment = rawAttachments?.map((a) => ({
+        name: a.filename,
+        content: a.content, // déjà en base64, Brevo l'attend tel quel
     }));
 
-    const sanitizedFrom = input.from ? sanitizeEmail(input.from) : undefined;
-    const sanitizedTo = typeof input.to === "string" ? sanitizeEmail(input.to) : input.to.map(sanitizeEmail);
-
-    return transporter.sendMail({
-        from: env.MAIL_FROM,
-        to: sanitizedTo,
-        cc: input.cc ? (typeof input.cc === "string" ? sanitizeEmail(input.cc) : input.cc.map(sanitizeEmail)) : undefined,
-        bcc: input.bcc ? (typeof input.bcc === "string" ? sanitizeEmail(input.bcc) : input.bcc.map(sanitizeEmail)) : undefined,
+    const payload = {
+        sender: SENDER,
+        to: toEmailList(input.to),
+        cc: toEmailList(input.cc),
+        bcc: toEmailList(input.bcc),
         subject: input.subject,
-        html: input.html,
-        text: input.text,
-        attachments,
+        htmlContent: input.html,
+        textContent: input.text,
+        attachment,
+    };
+
+    const res = await fetch(BREVO_API_URL, {
+        method: "POST",
+        headers: {
+            "api-key": env.BREVO_API_KEY,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
     });
+
+    if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Échec envoi Brevo (${res.status}): ${body}`);
+    }
+
+    return res.json();
 }
