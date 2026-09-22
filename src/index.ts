@@ -19,17 +19,16 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 app.route("/api/mail", mailRoutes);
 
 async function start() {
+  serve({ fetch: app.fetch, port: env.PORT, hostname: "0.0.0.0" }, (info) => {
+    console.log(`🚀 Mail server démarré sur http://localhost:${info.port}`);
+  });
+
   try {
     await verifyMailer();
     console.log("✅ Connexion SMTP vérifiée");
   } catch (err) {
-    console.error("❌ Impossible de se connecter au SMTP:", safeError(err));
-    process.exit(1);
+    console.error("⚠️ SMTP indisponible au démarrage:", safeError(err));
   }
-
-  serve({ fetch: app.fetch, port: env.PORT }, (info) => {
-    console.log(`🚀 Mail server démarré sur http://localhost:${info.port}`);
-  });
 }
 
 start();
