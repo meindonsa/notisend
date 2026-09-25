@@ -17,6 +17,7 @@ const attachmentSchema = z.object({
 });
 
 export const sendMailSchema = z.object({
+    app: z.string().min(1),
     from: z.string().email().optional(),
     to: z.union([z.string().email(), z.array(z.string().email())]),
     subject: z.string().min(1),

@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { sendMailSchema } from "../types/mail.types.js";
 import { sendMail } from "../services/mailer.js";
+import { SENDERS } from "../config/env.js";
 import { renderTemplate } from "../services/template.js";
 import { apiKeyAuth } from "../middlewares/auth.js";
 import { rateLimit, maxBodySize } from "../middlewares/security.js";
@@ -19,6 +20,10 @@ mailRoutes.post("/", async (c) => {
     }
 
     const data = parsed.data;
+
+    if (!SENDERS[data.app.trim().toLowerCase()]) {
+        return c.json({ error: "Application inconnue" }, 400);
+    }
     console.log("Recieve sent : " + data.subject || "a")
     try {
         const html = await renderTemplate(data.templateType, {

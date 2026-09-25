@@ -3,6 +3,7 @@ x-api-key: {{api_key}}
 Content-Type: application/json
 
 {
+  "app": "facturly",
   "to": "ebanethboris@icloud.com",
   "subject": "Votre code de connexion",
   "templateType": "otp",
