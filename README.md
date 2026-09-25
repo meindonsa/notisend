@@ -12,6 +12,14 @@ node -e "
 ### Set smtp configuration
 Duplicate `.env.example` to `.env` and set avaible values
 
+`MAIL_FROM` is a JSON list of senders, one per application:
+
+```
+MAIL_FROM='[{"app":"techwatch","email":"TECHWATCH <noreply@techwatch.meindonsa.com>"},{"app":"facturly","email":"FACTURLY <noreply@facturly.meindonsa.com>"}]'
+```
+
+Each app using notisend must identify itself with the `app` field in the request body.
+
 ### Build
 
 ```
@@ -28,6 +36,7 @@ open http://localhost:3000
 Ex:
 ```shel
 curl -X POST http://localhost:3000/api/mail/send   -H "Content-Type: application/json"   -H "x-api-key: API_KEY"   -d '{
+    "app": "facturly",
     "to": "<YOUR_EMAIL>",
     "subject": "Test",
     "html": "<p>it works !</p>"

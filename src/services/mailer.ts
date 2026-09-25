@@ -1,4 +1,4 @@
-import { env, ALLOWED_DOMAINS, SENDER } from "../config/env.js";
+import { env, ALLOWED_DOMAINS, getSender } from "../config/env.js";
 import type { SendMailInput } from "../types/mail.types.js";
 
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
@@ -83,7 +83,7 @@ export async function sendMail(input: SendMailInput & { html: string }) {
     }));
 
     const payload = {
-        sender: SENDER,
+        sender: getSender(input.app),
         to: toEmailList(input.to),
         cc: toEmailList(input.cc),
         bcc: toEmailList(input.bcc),

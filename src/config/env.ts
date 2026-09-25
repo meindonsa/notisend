@@ -18,9 +18,46 @@ export const ALLOWED_DOMAINS = env.ALLOWED_EMAIL_DOMAINS
 
 export const IS_PRODUCTION = env.NODE_ENV === "production";
 
-export const SENDER = (() => {
-    const match = env.MAIL_FROM.match(/^(.*)<(.+)>$/);
+const mailFromSchema = z
+    .array(
+        z.object({
+            app: z.string().min(1),
+            email: z.string().min(1),
+        }),
+    )
+    .min(1);
+
+export type Sender = { name?: string; email: string };
+
+function parseSender(value: string): Sender {
+    const match = value.match(/^(.*)<(.+)>$/);
     return match
         ? { name: match[1].trim().replace(/^"|"$/g, ""), email: match[2].trim() }
-        : { email: env.MAIL_FROM.trim() };
+        : { email: value.trim() };
+}
+
+export const SENDERS: Record<string, Sender> = (() => {
+    let raw: unknown;
+    try {
+        raw = JSON.parse(env.MAIL_FROM);
+    } catch {
+        throw new Error(
+            'MAIL_FROM doit être un JSON valide, ex: [{"app":"techwatch","email":"TECHWATCH <noreply@example.com>"}]',
+        );
+    }
+
+    const entries = mailFromSchema.parse(raw);
+    return Object.fromEntries(
+        entries.map((e) => [e.app.trim().toLowerCase(), parseSender(e.email)]),
+    );
 })();
+
+export const ALLOWED_APPS = Object.keys(SENDERS);
+
+export function getSender(app: string): Sender {
+    const sender = SENDERS[app.trim().toLowerCase()];
+    if (!sender) {
+        throw new Error(`Application inconnue: ${app}`);
+    }
+    return sender;
+}
